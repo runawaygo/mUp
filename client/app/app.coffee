@@ -1,3 +1,7 @@
 define (require, exports, module)->
-	console.log('superwolf')
+	$(->
+		$('body').on('touchmove', (e)-> 
+			e.preventDefault()
+		)
+	)
 	module.exports
