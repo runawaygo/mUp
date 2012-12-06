@@ -28,3 +28,6 @@
 [submodule "client/vendors/swipeview"]
 	path = client/vendors/swipeview
 	url = git://github.com/cubiq/SwipeView.git
+[submodule "client/vendors/async"]
+	path = client/vendors/async
+	url = git://github.com/caolan/async.git

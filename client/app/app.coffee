@@ -1,5 +1,6 @@
 define (require, exports, module)->
-
+	animate = require('./utility/animate')
+	
 	class ViewBase extends Backbone.View
 		tagName:'div'
 		render:=>
@@ -20,20 +21,38 @@ define (require, exports, module)->
 		events:
 			'click':"changeNextItem"
 
-		changeItem:(to)=>
-			if  to<0 or to>=@items.length or to is @activeIndex then return @
+		changeItem:(name)=>
+			if typeof name is 'string'
+				return @_changeItemByName(name)
+			else if typeof name is 'number'
+				return @_changeItemByIndex(name)
+			else 
+				throw "Invalid args type for page index or page name"
+		_changeItemByName:(name)->
+			#TODO: change item by page name
+			@
+
+		_changeItemByIndex:(to)->
+			return @ if  to<0 or to>=@items.length or to is @activeIndex or @busy
+
+			@busy = true
+
 			fromItem = @items[@activeIndex]
 			toItem = @items[to]
 
-			fromItem.$el.removeClass('active')
 			toItem.$el.addClass('active')
+
+			animate(fromItem, toItem, animate.style.swipeRight, =>
+				@busy = false
+				fromItem.$el.removeClass('active')
+			)
 
 			@activeIndex = to
 			@
 
 		changeNextItem:=>
 			to = @activeIndex + 1
-			if to is @items.length then to =0
+			if to is @items.length then to=0
 			@changeItem(to)
 			@
 
@@ -45,6 +64,11 @@ define (require, exports, module)->
 				panel.$el.addClass('active') if i is 0
 				
 			@
+
+
+	class TabContainer extends ViewBase
+
+	class CarouselContainer extends ViewBase
 
 	class Page extends ViewBase
 		className:'page'

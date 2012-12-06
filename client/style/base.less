@@ -1,6 +1,14 @@
 @import '../vendors/animate.css/animate.css';
 @import '../vendors/cssmixins/less/css3.less';
 
+@import '../style/animate.css';
+
+*{
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+}
+
 html,body,iframe{
 	margin:0;
 	padding:0;
@@ -26,8 +34,11 @@ body{
 
 .card-container{
 	display:block;
+	position:relative;
+	overflow:hidden;
 	.panel{
 		display:none;
+		position:absolute;
 		top:0px;
 		left:0px;
 
@@ -35,7 +46,7 @@ body{
 		height:100%;
 		
 		&.active{
-			display:-webkit-box;	
+			display:block;	
 		}
 	}
 }
