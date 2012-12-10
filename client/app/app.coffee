@@ -84,47 +84,52 @@ define (require, exports, module)->
 			'mousedown':'startDrag'
 			'mousemove':'onDrag'
 			'mouseup':'endDrag'
+			'touchstart':'startDrag'
+			'touchmove':'onDrag'
+			'touchend':'endDrag'
 		startDrag:(event)=>
 			point = event.touches?[0] ? event
 			@startX = @lastX = point.clientX
 			@dragging = true
+			@startDate = new Date
 
 			@currentItem = @items[@activeIndex]
-			console.log @_getPrevItemIndex()
-			console.log @_getNextItemIndex()		
 
 			@prevItem = @items[@_getPrevItemIndex()]
 			@nextItem = @items[@_getNextItemIndex()]
 
-			console.log @prevItem
-			console.log @nextItem
 
 			@viewWidth = @getWidth()
 
-			@currentItem.$el.css('-webkit-transform', 'translate3d(-100px,0, 0)')
+			# @currentItem.$el.css('-webkit-transform', 'translate3d(-100px,0, 0)')
 			@
 
 		onDrag:(event)=>
 			return @ if not @dragging 
-
 			
 			point = event.touches?[0] ? event
 			@lastX = point.clientX
 			distanceX = @lastX-@startX
 
-			console.log @startX
-			console.log @lastX
-			console.log distanceX
+			if @dragging
+				if distanceX>0
+					@nextItem.$el.removeClass('active')
+					@prevItem.$el
+						.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+						.addClass('active')
 
-			@prevItem.$el.addClass('active')
-			@nextItem.$el.addClass('active')
+					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+						
 
-			if @swiping
-				@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
-				if distanceX>10		
-					@prevItem.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
-				else if distanceX<-10
-					@nextItem.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+
+				else if distanceX<0
+					@prevItem.$el.removeClass('active')
+
+					@nextItem.$el
+						.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
+						.addClass('active')
+
+					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
 			@
 
 		endDrag:(event)=>					
@@ -132,22 +137,31 @@ define (require, exports, module)->
 
 			distanceX = @lastX-@startX
 			percentage = distanceX/@viewWidth
+			endDate = new Date
+			speed =  distanceX/(endDate-@startDate)
 
-			if percentage>0.4
-				@currentItem.$el.removeClass('active').css('-webkit-transform', 'translate3d('+(-@viewWidth)+'px,0, 0)')
+			if percentage>0.35 or speed>0.5
+				@currentItem.$el.removeClass('active')
 				@prevItem?.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
-				@nextItem?.$el.removeClass('active').css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
+				@nextItem?.$el.removeClass('active')
 
-			else if percentage<-0.4
-				@currentItem.$el.removeClass('active').css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
-				@prevItem?.$el.removeClass('active').css('-webkit-transform', 'translate3d('+(-@viewWidth)+'px,0, 0)')
+				@activeIndex = @_getPrevItemIndex()
+
+			else if percentage<-0.35 or speed<-0.5 
+				@currentItem.$el.removeClass('active')
+				@prevItem?.$el.removeClass('active')
 				@nextItem?.$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
+
+				@activeIndex = @_getNextItemIndex()
 			else
 				@currentItem.$el.css('-webkit-transform', 'translate3d(0 ,0, 0)')
-				@prevItem?.$el.removeClass('active').css('-webkit-transform', 'translate3d('+(-@viewWidth)+'px,0, 0)')
-				@nextItem?.$el.removeClass('active').css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
+				console.log @prevItem
+				@prevItem?.$el.removeClass('active')
+				console.log @prevItem?.$el[0]
+				@nextItem?.$el.removeClass('active')
+				console.log 'superwolf'
 
-			@swiping = false
+			@dragging = false
 
 			@
 
@@ -158,6 +172,8 @@ define (require, exports, module)->
 		container = new CarouselContainer({id:'main-container'})
 			.addItem(new Panel {id:'panel1'})
 			.addItem(new Panel {id:'panel2'})
+			.addItem(new Panel {id:'panel3'})
+			.addItem(new Panel {id:'panel4'})
 			.render()
 
 		console.log container
