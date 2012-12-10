@@ -50,3 +50,21 @@ body{
 		}
 	}
 }
+.carousel-indicator-container{
+	display:block;	
+	position:absolute;
+	bottom:10px;
+	width:100%;
+	z-index: 10;
+	text-align: center;
+}
+.carousel-indicator-item{
+	display:inline-block;
+	width:10px;
+	height:10px;
+	margin:2px;
+	background:green;
+	&.active{
+		background:yellow;
+	}
+}

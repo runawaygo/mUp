@@ -19,44 +19,47 @@ define (require, exports, module)->
 		initialize:->
 			@ 
 
-		addItem:(item)=>
-			@items.push(item)
+		_setActiveItem:(i)->
+			@activeIndex = i
+			@items[i].$el.addClass('active')
 			@
-		changeItem:(name)=>
-			if typeof name is 'string'
-				return @_changeItemByName(name)
-			else if typeof name is 'number'
-				return @_changeItemByIndex(name)
-			else 
-				throw "Invalid args type for page index or page name"
-			@
-
-		_changeItemByName:(name)->
+		_changeItemByName:(name, options)->
 			#TODO: change item by page name
 			@
 
-		_changeItemByIndex:(to)->
+		_changeItemByIndex:(to, options)->
 			return @ if  to<0 or to>=@items.length or to is @activeIndex or @busy
 
-			@busy = true
-
-			fromItem = @items[@activeIndex]
 			toItem = @items[to]
-
-			toItem.$el.addClass('active')
-
-			animate(fromItem, toItem, animate.style.swipeRight, =>
-				@busy = false
+			
+			if options.animate? and not @busy
+				@busy = true
+				fromItem = @items[@activeIndex]
+				animate(fromItem, toItem, animate.style.swipeRight, =>
+					@busy = false
+					fromItem.$el.removeClass('active')
+				)
+			else
 				fromItem.$el.removeClass('active')
-			)
 
-			@activeIndex = to
+			@_setActiveItem(to)
 			@
 
 		_getNextItemIndex:=> (@activeIndex+1) % @items.length
 
 		_getPrevItemIndex:=> (@activeIndex+@items.length-1) % @items.length
 
+		addItem:(item)=>
+			@items.push(item)
+			@
+		changeItem:(name, options)=>
+			if typeof name is 'string'
+				return @_changeItemByName(name, options)
+			else if typeof name is 'number'
+				return @_changeItemByIndex(name, options)
+			else 
+				throw "Invalid args type for page index or page name"
+			@
 
 		changeNextItem:=>
 			return null if @items.length is 1
@@ -64,13 +67,16 @@ define (require, exports, module)->
 			@changeItem(@_getNextItemIndex())
 			@
 
+		_renderItem:(panel, i)->
+			@$el.append(panel.render().el)
+			@
+		
+
 		render:=>
-			@activeIndex = 0 if @items.length > 0
+			return @ if @items.length is 0
 			
-			for panel, i in @items
-				@$el.append(panel.render().el)
-				panel.$el.addClass('active') if i is 0
-				
+			@_renderItem panel,i for panel, i in @items
+			@_setActiveItem(0)
 			@
 
 
@@ -80,13 +86,17 @@ define (require, exports, module)->
 		startX:0
 		lastX:0
 		dragging:false
+		indicatorTemplate:'<div class="carousel-indicator-container"></div>'
+		indicatorItem:'<div class="carousel-indicator-item"></div>'
 		events:
 			'mousedown':'startDrag'
 			'mousemove':'onDrag'
 			'mouseup':'endDrag'
+
 			'touchstart':'startDrag'
 			'touchmove':'onDrag'
 			'touchend':'endDrag'
+
 		startDrag:(event)=>
 			point = event.touches?[0] ? event
 			@startX = @lastX = point.clientX
@@ -132,7 +142,7 @@ define (require, exports, module)->
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
 			@
 
-		endDrag:(event)=>					
+		endDrag:(event)=>
 			return @ if not @dragging
 
 			distanceX = @lastX-@startX
@@ -145,25 +155,41 @@ define (require, exports, module)->
 				@prevItem?.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
 				@nextItem?.$el.removeClass('active')
 
-				@activeIndex = @_getPrevItemIndex()
+				@_setActiveItem(@_getPrevItemIndex())
 
 			else if percentage<-0.35 or speed<-0.5 
 				@currentItem.$el.removeClass('active')
 				@prevItem?.$el.removeClass('active')
 				@nextItem?.$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
 
-				@activeIndex = @_getNextItemIndex()
+				@_setActiveItem(@_getNextItemIndex())
 			else
 				@currentItem.$el.css('-webkit-transform', 'translate3d(0 ,0, 0)')
-				console.log @prevItem
 				@prevItem?.$el.removeClass('active')
-				console.log @prevItem?.$el[0]
 				@nextItem?.$el.removeClass('active')
-				console.log 'superwolf'
 
 			@dragging = false
 
 			@
+
+		_setActiveItem:(i)->
+			indicatorItems = @$el.find('.carousel-indicator-item')
+			$(indicatorItems[@activeIndex]).removeClass('active')
+			$(indicatorItems[i]).addClass('active')
+
+			super(i)
+			
+
+
+		_renderItem:(panel, i)->
+			indicatorContainer = @$el.find('.carousel-indicator-container')
+			indicatorContainer.append(@indicatorItem)
+			super(panel, i)
+		render:=>
+			@$el.append(@indicatorTemplate)
+			super()
+
+
 
 	class Page extends ViewBase
 		className:'page'
