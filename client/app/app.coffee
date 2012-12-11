@@ -15,7 +15,8 @@ define (require, exports, module)->
 	class CardContainer extends ViewBase
 		className:"card-container"
 		items:[]
-		@activeIndex:-1
+		activeIndex:-1
+		isInfinite:false
 		initialize:->
 			@ 
 
@@ -45,9 +46,21 @@ define (require, exports, module)->
 			@_setActiveItem(to)
 			@
 
-		_getNextItemIndex:=> (@activeIndex+1) % @items.length
+		_getNextItemIndex:=> 
+			nextItemIndex = @activeIndex+1
+			count = @items.length
+			if @isInfinite
+				nextItemIndex%count
+			else
+				if nextItemIndex is count then null else nextItemIndex
 
-		_getPrevItemIndex:=> (@activeIndex+@items.length-1) % @items.length
+		_getPrevItemIndex:=> 
+			nextItemIndex = @activeIndex-1
+			count = @items.length
+			if @isInfinite
+				(nextItemIndex+count)%count
+			else
+				if nextItemIndex is -1 then null else nextItemIndex
 
 		addItem:(item)=>
 			@items.push(item)
@@ -123,8 +136,8 @@ define (require, exports, module)->
 
 			if @dragging
 				if distanceX>0
-					@nextItem.$el.removeClass('active')
-					@prevItem.$el
+					@nextItem?.$el.removeClass('active')
+					@prevItem?.$el
 						.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
 						.addClass('active')
 
@@ -133,9 +146,9 @@ define (require, exports, module)->
 
 
 				else if distanceX<0
-					@prevItem.$el.removeClass('active')
+					@prevItem?.$el.removeClass('active')
 
-					@nextItem.$el
+					@nextItem?.$el
 						.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 						.addClass('active')
 
@@ -150,17 +163,17 @@ define (require, exports, module)->
 			endDate = new Date
 			speed =  distanceX/(endDate-@startDate)
 
-			if percentage>0.35 or speed>0.5
+			if (percentage>0.35 or speed>0.5) and @prevItem
 				@currentItem.$el.removeClass('active')
-				@prevItem?.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
+				@prevItem.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
 				@nextItem?.$el.removeClass('active')
 
 				@_setActiveItem(@_getPrevItemIndex())
 
-			else if percentage<-0.35 or speed<-0.5 
+			else if (percentage<-0.35 or speed<-0.5) and @nextItem
 				@currentItem.$el.removeClass('active')
 				@prevItem?.$el.removeClass('active')
-				@nextItem?.$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
+				@nextItem.$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
 
 				@_setActiveItem(@_getNextItemIndex())
 			else
