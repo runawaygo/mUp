@@ -27,16 +27,17 @@ body{
 	-webkit-box-orient:vertical;
 	height:100%;
 }
-.panel{
+.panel,.container{
 	display:-webkit-box;
 	-webkit-box-orient:vertical;
+	-webkit-box-flex: 1;	
 }
 
 .card-container{
 	display:block;
 	position:relative;
 	overflow:hidden;
-	.panel{
+	.container, .panel{
 		display:none;
 		position:absolute;
 		top:0px;
@@ -45,8 +46,8 @@ body{
 		width:100%;
 		height:100%;
 		
-		&.active{
-			display:block;	
+		&.active, &.fake-active{
+			display:block;
 		}
 	}
 }
@@ -67,4 +68,19 @@ body{
 	&.active{
 		background:yellow;
 	}
+
+}
+
+.tab-container{
+	display:-webkit-box;
+	-webkit-box-orient:vertical;
+}
+.tab-item-title-container{
+	-webkit-box-flex:0;
+	display:-webkit-box;
+	-webkit-box-orient:horizontal;
+}
+
+.tab-item-title{
+	-webkit-box-flex:1;
 }

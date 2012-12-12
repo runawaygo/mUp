@@ -7,22 +7,26 @@ define (require, exports, module)->
 			@$el.width()
 		render:=>
 			@
+	class Model extends Backbone.Model
+	class Container extends ViewBase
+		className:'container'
 
-	class Panel extends ViewBase
+	class Panel extends Container
 		className:"panel"
-		
 
-	class CardContainer extends ViewBase
-		className:"card-container"
+
+	class CardContainer extends Container
+		className:"container card-container"
 		items:[]
 		activeIndex:-1
 		isInfinite:false
 		initialize:->
 			@ 
 
-		_setActiveItem:(i)->
-			@activeIndex = i
-			@items[i].$el.addClass('active')
+		_setActiveItem:(index)->
+			@activeIndex = index
+			@items[index].$el.addClass('active')
+			item.$el.removeClass('active') if i is not index for item,i in @items
 			@
 		_changeItemByName:(name, options)->
 			#TODO: change item by page name
@@ -36,12 +40,11 @@ define (require, exports, module)->
 			if options.animate? and not @busy
 				@busy = true
 				fromItem = @items[@activeIndex]
+				fromItem.$el.addClass('fake-active')
 				animate(fromItem, toItem, animate.style.swipeRight, =>
 					@busy = false
-					fromItem.$el.removeClass('active')
+					fromItem.$el.removeClass('fake-active')
 				)
-			else
-				fromItem.$el.removeClass('active')
 
 			@_setActiveItem(to)
 			@
@@ -62,7 +65,7 @@ define (require, exports, module)->
 			else
 				if nextItemIndex is -1 then null else nextItemIndex
 
-		addItem:(item)=>
+		addItem:(item)->
 			@items.push(item)
 			@
 		changeItem:(name, options)=>
@@ -76,7 +79,6 @@ define (require, exports, module)->
 
 		changeNextItem:=>
 			return null if @items.length is 1
-
 			@changeItem(@_getNextItemIndex())
 			@
 
@@ -92,8 +94,52 @@ define (require, exports, module)->
 			@_setActiveItem(0)
 			@
 
+	class TabItemTitle extends Container
+		className:'container tab-item-title'
+		template:'<%= title %>'
+		render:->
+			@$el.html(_.template(@template, @model.toJSON()))
+			@
 
-	class TabContainer extends CardContainer
+	class TabItem extends Container
+		className:'container tab-item'
+		initialize:(options)->
+			@title = options.title
+			@titleView = new TabItemTitle({model:@model})
+		contentRender:->
+			@
+		render:=>
+			@titleView.render()
+			@contentRender()
+			@
+
+	class TabContainer extends Container
+		className:"container tab-container"
+		tabTitleContainerTemplate:'<div class="tab-item-title-container"></div>'
+		initialize:->
+			@contentContainer = new CardContainer
+			@items = []
+			@
+		addItem:(item)->
+			@items.push item
+			@contentContainer.addItem item
+			@
+
+		_renderTitle:->
+			@$el.append @tabTitleContainerTemplate
+			@$titleContainer = @$el.find('.tab-item-title-container')
+			for panel in @items
+				@$titleContainer.append(panel.titleView.$el)
+			@
+
+		render:=>
+			@$el.html('')
+			@$el.append @contentContainer.render().$el
+			@_renderTitle()
+			
+
+			@
+
 
 	class CarouselContainer extends CardContainer
 		startX:0
@@ -138,8 +184,9 @@ define (require, exports, module)->
 				if distanceX>0
 					@nextItem?.$el.removeClass('active')
 					@prevItem?.$el
-						.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
 						.addClass('active')
+						.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+						
 
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
 						
@@ -149,8 +196,9 @@ define (require, exports, module)->
 					@prevItem?.$el.removeClass('active')
 
 					@nextItem?.$el
-						.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 						.addClass('active')
+						.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
+						
 
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
 			@
@@ -199,23 +247,32 @@ define (require, exports, module)->
 			indicatorContainer.append(@indicatorItem)
 			super(panel, i)
 		render:=>
+			@$el.html('')
 			@$el.append(@indicatorTemplate)
 			super()
 
 
 
-	class Page extends ViewBase
-		className:'page'
+	class Page extends Container
+		className:'page container'
 		
 	$(->
-		container = new CarouselContainer({id:'main-container'})
-			.addItem(new Panel {id:'panel1'})
-			.addItem(new Panel {id:'panel2'})
-			.addItem(new Panel {id:'panel3'})
-			.addItem(new Panel {id:'panel4'})
-			.render()
+		# container = new CarouselContainer({id:'main-container'})
+		# 	.addItem(new Panel {id:'panel1'})
+		# 	.addItem(new Panel {id:'panel2'})
+		# 	.addItem(new Panel {id:'panel3'})
+		# 	.addItem(new Panel {id:'panel4'})
+		# 	.render()
 
 		console.log container
+
+		container = new TabContainer({id:'main-container'})
+			.addItem(new TabItem({id:'panel1', model:new Backbone.Model({title:'superowlf'})}))
+			.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superowlf'})}))
+			.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superowlf'})}))
+			.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superowlf'})}))
+			.render()
+
 
 		$('body')
 			.append(container.el)
