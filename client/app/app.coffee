@@ -5,6 +5,12 @@ define (require, exports, module)->
 		tagName:'div'
 		getWidth:->
 			@$el.width()
+		active:->
+			@$el.addClass('active')
+			@
+		deactive:->
+			@$el.removeClass('active')
+			@
 		render:=>
 			@
 	class Model extends Backbone.Model
@@ -23,21 +29,20 @@ define (require, exports, module)->
 		initialize:->
 			@ 
 
-		_setActiveItem:(index)->
-			@activeIndex = index
-			@items[index].$el.addClass('active')
-			item.$el.removeClass('active') if i is not index for item,i in @items
-			@
-		_changeItemByName:(name, options)->
-			#TODO: change item by page name
-			@
+		_setActiveItem:(toActiveItem)->
+			return @ if @items[@activeIndex] is toActiveItem
 
-		_changeItemByIndex:(to, options)->
-			return @ if  to<0 or to>=@items.length or to is @activeIndex or @busy
+			toActiveItem = @items[toActiveItem] if typeof toActiveItem is 'number'
 
-			toItem = @items[to]
-			
-			if options.animate? and not @busy
+			for item,i in @items
+				if item is toActiveItem
+					item.active()
+					@activeIndex = i
+				else
+					item.deactive()
+			@
+		_changeItem:(toItem, options)->
+			if options?.animate? and not @busy
 				@busy = true
 				fromItem = @items[@activeIndex]
 				fromItem.$el.addClass('fake-active')
@@ -46,8 +51,15 @@ define (require, exports, module)->
 					fromItem.$el.removeClass('fake-active')
 				)
 
-			@_setActiveItem(to)
+			@_setActiveItem(toItem)
+
+		_changeItemByName:(name, options)->
+			#TODO: change item by page name
 			@
+
+		_changeItemByIndex:(to, options)->
+			return @ if  to<0 or to>=@items.length or to is @activeIndex or @busy
+			@_changeItem(@items[to])
 
 		_getNextItemIndex:=> 
 			nextItemIndex = @activeIndex+1
@@ -67,13 +79,16 @@ define (require, exports, module)->
 
 		addItem:(item)->
 			@items.push(item)
+			item.on('active',@changeItem)
 			@
 		changeItem:(name, options)=>
 			if typeof name is 'string'
 				return @_changeItemByName(name, options)
 			else if typeof name is 'number'
 				return @_changeItemByIndex(name, options)
-			else 
+			else if typeof name is 'object'
+				return @_changeItem(name, options)
+			else
 				throw "Invalid args type for page index or page name"
 			@
 
@@ -85,7 +100,6 @@ define (require, exports, module)->
 		_renderItem:(panel, i)->
 			@$el.append(panel.render().el)
 			@
-		
 
 		render:=>
 			return @ if @items.length is 0
@@ -97,6 +111,23 @@ define (require, exports, module)->
 	class TabItemTitle extends Container
 		className:'container tab-item-title'
 		template:'<%= title %>'
+		events:
+			'touchstart': 'addPressingClass'
+			'mousedown'	: 'addPressingClass'
+			'touchend'	: 'removePressingClass'
+			'mouseup'	: 'removePressingClass'
+			'tap'		: 'onTap'
+			'click'		: 'onTap'
+		onTap:=>
+			@trigger 'active'
+			@
+		addPressingClass:=>
+			@$el.addClass('pressing')
+			@
+		removePressingClass:=>
+			@$el.removeClass('pressing')
+			@
+		
 		render:->
 			@$el.html(_.template(@template, @model.toJSON()))
 			@
@@ -106,6 +137,16 @@ define (require, exports, module)->
 		initialize:(options)->
 			@title = options.title
 			@titleView = new TabItemTitle({model:@model})
+			@titleView.on('active',=>@trigger('active', @))
+			@
+		active:=>
+			@titleView.active()
+			super()
+
+		deactive:=>
+			@titleView.deactive()
+			super()
+
 		contentRender:->
 			@
 		render:=>
@@ -115,12 +156,15 @@ define (require, exports, module)->
 
 	class TabContainer extends Container
 		className:"container tab-container"
-		tabTitleContainerTemplate:'<div class="tab-item-title-container"></div>'
+		tabTitleContainerTemplate: '<div class="tab-item-title-container"></div>'
+		tabPositionBottom: true
+
 		initialize:->
 			@contentContainer = new CardContainer
 			@items = []
 			@
 		addItem:(item)->
+			index = @items.length
 			@items.push item
 			@contentContainer.addItem item
 			@
@@ -134,10 +178,12 @@ define (require, exports, module)->
 
 		render:=>
 			@$el.html('')
-			@$el.append @contentContainer.render().$el
-			@_renderTitle()
-			
-
+			if @tabPositionBottom
+				@$el.append @contentContainer.render().$el
+				@_renderTitle()
+			else
+				@_renderTitle()
+				@$el.append @contentContainer.render().$el
 			@
 
 
@@ -239,8 +285,6 @@ define (require, exports, module)->
 			$(indicatorItems[i]).addClass('active')
 
 			super(i)
-			
-
 
 		_renderItem:(panel, i)->
 			indicatorContainer = @$el.find('.carousel-indicator-container')
@@ -257,21 +301,19 @@ define (require, exports, module)->
 		className:'page container'
 		
 	$(->
-		# container = new CarouselContainer({id:'main-container'})
-		# 	.addItem(new Panel {id:'panel1'})
-		# 	.addItem(new Panel {id:'panel2'})
-		# 	.addItem(new Panel {id:'panel3'})
-		# 	.addItem(new Panel {id:'panel4'})
-		# 	.render()
-
-		console.log container
-
-		container = new TabContainer({id:'main-container'})
-			.addItem(new TabItem({id:'panel1', model:new Backbone.Model({title:'superowlf'})}))
-			.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superowlf'})}))
-			.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superowlf'})}))
-			.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superowlf'})}))
+		container = new CarouselContainer({id:'main-container'})
+			.addItem(new Panel {id:'panel1'})
+			.addItem(new Panel {id:'panel2'})
+			.addItem(new Panel {id:'panel3'})
+			.addItem(new Panel {id:'panel4'})
 			.render()
+
+		# container = new TabContainer({id:'main-container'})
+		# 	.addItem(new TabItem({id:'panel1', model:new Backbone.Model({title:'superowlf'})}))
+		# 	.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superowlf'})}))
+		# 	.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superowlf'})}))
+		# 	.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superowlf'})}))
+		# 	.render()
 
 
 		$('body')
