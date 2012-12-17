@@ -22,6 +22,9 @@ body{
   background-repeat: repeat-x;
   background-position: 0 40px;
 }
+.animating{
+	-webkit-transition:all 200ms linear 0;
+}
 .page{
 	display:-webkit-box;
 	-webkit-box-orient:vertical;
@@ -83,6 +86,7 @@ body{
 
 .tab-item-title{
 	-webkit-box-flex:1;
+	height:100px;
 	&.pressing{
 		background:green;
 		opacity: 0.6;

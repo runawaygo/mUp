@@ -1,8 +1,23 @@
 define (require, exports, module)->
 	animate = require('./utility/animate')
-	
+
+	class Plugin
+
+	class Activable extends Plugin
+
+	# class PressingStyle extends Plugin
+	# 	events:
+
+	# 	init:(@view)->
+	# 	destory:->
+
 	class ViewBase extends Backbone.View
 		tagName:'div'
+		template:''
+		initialize:(@options)->
+			@template = @options?.template ? @template
+
+			@
 		getWidth:->
 			@$el.width()
 		active:->
@@ -12,14 +27,15 @@ define (require, exports, module)->
 			@$el.removeClass('active')
 			@
 		render:=>
+			@$el.html(@template)
 			@
+
 	class Model extends Backbone.Model
 	class Container extends ViewBase
 		className:'container'
 
 	class Panel extends Container
 		className:"panel"
-
 
 	class CardContainer extends Container
 		className:"container card-container"
@@ -129,12 +145,15 @@ define (require, exports, module)->
 			@
 		
 		render:->
+			super()
 			@$el.html(_.template(@template, @model.toJSON()))
 			@
 
 	class TabItem extends Container
 		className:'container tab-item'
-		initialize:(options)->
+		initialize:(@options)->
+			super(@options)
+			console.log @template			
 			@title = options.title
 			@titleView = new TabItemTitle({model:@model})
 			@titleView.on('active',=>@trigger('active', @))
@@ -147,11 +166,9 @@ define (require, exports, module)->
 			@titleView.deactive()
 			super()
 
-		contentRender:->
-			@
 		render:=>
+			super()
 			@titleView.render()
-			@contentRender()
 			@
 
 	class TabContainer extends Container
@@ -177,7 +194,7 @@ define (require, exports, module)->
 			@
 
 		render:=>
-			@$el.html('')
+			super()
 			if @tabPositionBottom
 				@$el.append @contentContainer.render().$el
 				@_renderTitle()
@@ -191,6 +208,7 @@ define (require, exports, module)->
 		startX:0
 		lastX:0
 		dragging:false
+		className:"container card-container carousel-container"
 		indicatorTemplate:'<div class="carousel-indicator-container"></div>'
 		indicatorItem:'<div class="carousel-indicator-item"></div>'
 		events:
@@ -203,6 +221,8 @@ define (require, exports, module)->
 			'touchend':'endDrag'
 
 		startDrag:(event)=>
+			return @ if @isAnimating
+
 			point = event.touches?[0] ? event
 			@startX = @lastX = point.clientX
 			@dragging = true
@@ -211,8 +231,10 @@ define (require, exports, module)->
 			@currentItem = @items[@activeIndex]
 
 			@prevItem = @items[@_getPrevItemIndex()]
-			@nextItem = @items[@_getNextItemIndex()]
+			@prevItem?.$el.addClass('active')
 
+			@nextItem = @items[@_getNextItemIndex()]
+			@nextItem?.$el.addClass('active')
 
 			@viewWidth = @getWidth()
 
@@ -227,26 +249,30 @@ define (require, exports, module)->
 			distanceX = @lastX-@startX
 
 			if @dragging
-				if distanceX>0
-					@nextItem?.$el.removeClass('active')
-					@prevItem?.$el
-						.addClass('active')
-						.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
-						
-
+				if distanceX>1 or distanceX<-1
+					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
-						
+			@
 
+		_swipeAnimate:(mainItem, subItem, uselessItem, direction, callback)->
+			@isAnimating = true
+			subItem?.$el
+				.addClass('animating')
+				.css('-webkit-transform', 'translate3d('+(@viewWidth*direction)+'px,0,0)')
 
-				else if distanceX<0
-					@prevItem?.$el.removeClass('active')
+			mainItem.$el
+				.addClass('animating')
+				.css('-webkit-transform', 'translate3d(0,0,0)')
 
-					@nextItem?.$el
-						.addClass('active')
-						.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
-						
-
-					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+			setTimeout((=>
+				mainItem.$el.removeClass('animating')
+				subItem?.$el.removeClass('active animating')
+				uselessItem?.$el.removeClass('active')
+				callback?()
+				@isAnimating =false
+			),250)
+			
 			@
 
 		endDrag:(event)=>
@@ -258,22 +284,14 @@ define (require, exports, module)->
 			speed =  distanceX/(endDate-@startDate)
 
 			if (percentage>0.35 or speed>0.5) and @prevItem
-				@currentItem.$el.removeClass('active')
-				@prevItem.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
-				@nextItem?.$el.removeClass('active')
-
-				@_setActiveItem(@_getPrevItemIndex())
-
+				@_swipeAnimate @prevItem,@currentItem,@nextItem,1,=>@_setActiveItem(@_getPrevItemIndex())
+			else if (0<percentage)
+				@_swipeAnimate @currentItem,@prevItem,@nextItem,-1
 			else if (percentage<-0.35 or speed<-0.5) and @nextItem
-				@currentItem.$el.removeClass('active')
-				@prevItem?.$el.removeClass('active')
-				@nextItem.$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
-
-				@_setActiveItem(@_getNextItemIndex())
-			else
-				@currentItem.$el.css('-webkit-transform', 'translate3d(0 ,0, 0)')
-				@prevItem?.$el.removeClass('active')
-				@nextItem?.$el.removeClass('active')
+				@_swipeAnimate @nextItem,@currentItem,@prevItem,-1,=>@_setActiveItem(@_getNextItemIndex())
+				
+			else if (percentage<0)
+				@_swipeAnimate @currentItem,@nextItem,@prevItem,1
 
 			@dragging = false
 
@@ -294,6 +312,8 @@ define (require, exports, module)->
 			@$el.html('')
 			@$el.append(@indicatorTemplate)
 			super()
+			
+			
 
 
 
@@ -302,18 +322,22 @@ define (require, exports, module)->
 		
 	$(->
 		container = new CarouselContainer({id:'main-container'})
-			.addItem(new Panel {id:'panel1'})
-			.addItem(new Panel {id:'panel2'})
-			.addItem(new Panel {id:'panel3'})
-			.addItem(new Panel {id:'panel4'})
-			.render()
-
+			# .addItem(new Panel {id:'panel1'})
+			# .addItem(new Panel {id:'panel2'})
+			# .addItem(new Panel {id:'panel3'})
+			# .addItem(new Panel {id:'panel4'})
+		
 		# container = new TabContainer({id:'main-container'})
-		# 	.addItem(new TabItem({id:'panel1', model:new Backbone.Model({title:'superowlf'})}))
-		# 	.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superowlf'})}))
-		# 	.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superowlf'})}))
-		# 	.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superowlf'})}))
-		# 	.render()
+			.addItem(new TabItem({
+				id:'panel1', 
+				template:require('./templates/test.html'), 
+				model:new Backbone.Model({title:'superwolf'})
+			}))
+			.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superwolf'})}))
+			.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superwolf'})}))
+			.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superwolf'})}))
+		
+		container.render()
 
 
 		$('body')
