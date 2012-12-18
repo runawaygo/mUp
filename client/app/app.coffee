@@ -1,5 +1,9 @@
 define (require, exports, module)->
 	animate = require('./utility/animate')
+	class Config extends Backbone.Model
+		initialize:->
+			@screenWidth = $('body').width()
+			@screenHeight = $('body').width()
 
 	class Plugin
 
@@ -34,20 +38,17 @@ define (require, exports, module)->
 	class Container extends ViewBase
 		className:'container'
 
-	class Panel extends Container
-		className:"panel"
-
 	class CardContainer extends Container
 		className:"container card-container"
-		items:[]
 		activeIndex:-1
 		isInfinite:false
-		initialize:->
+		initialize:(@options)->
+			super(@options)
+			@items = []
 			@ 
 
 		_setActiveItem:(toActiveItem)->
 			return @ if @items[@activeIndex] is toActiveItem
-
 			toActiveItem = @items[toActiveItem] if typeof toActiveItem is 'number'
 
 			for item,i in @items
@@ -130,8 +131,10 @@ define (require, exports, module)->
 		events:
 			'touchstart': 'addPressingClass'
 			'mousedown'	: 'addPressingClass'
+
 			'touchend'	: 'removePressingClass'
 			'mouseup'	: 'removePressingClass'
+
 			'tap'		: 'onTap'
 			'click'		: 'onTap'
 		onTap:=>
@@ -146,29 +149,27 @@ define (require, exports, module)->
 		
 		render:->
 			super()
+			console.log @model
 			@$el.html(_.template(@template, @model.toJSON()))
 			@
 
 	class TabItem extends Container
-		className:'container tab-item'
 		initialize:(@options)->
 			super(@options)
-			console.log @template			
 			@title = options.title
 			@titleView = new TabItemTitle({model:@model})
 			@titleView.on('active',=>@trigger('active', @))
+			# console.log @options
+			@contentView = @options.contentView ? new Container(@options)
 			@
 		active:=>
 			@titleView.active()
-			super()
+			@contentView.active()
+			@
 
 		deactive:=>
 			@titleView.deactive()
-			super()
-
-		render:=>
-			super()
-			@titleView.render()
+			@contentView.deactive()
 			@
 
 	class TabContainer extends Container
@@ -183,14 +184,18 @@ define (require, exports, module)->
 		addItem:(item)->
 			index = @items.length
 			@items.push item
-			@contentContainer.addItem item
+			@contentContainer.addItem item.contentView
+
+			item.on('active',=>
+				@contentContainer.changeItem(item.contentView)
+			)
 			@
 
 		_renderTitle:->
 			@$el.append @tabTitleContainerTemplate
 			@$titleContainer = @$el.find('.tab-item-title-container')
-			for panel in @items
-				@$titleContainer.append(panel.titleView.$el)
+			@$titleContainer.append(panel.titleView.render().$el) for panel in @items
+				
 			@
 
 		render:=>
@@ -219,6 +224,10 @@ define (require, exports, module)->
 			'touchstart':'startDrag'
 			'touchmove':'onDrag'
 			'touchend':'endDrag'
+		initialize:(@options)->
+			super(@options)
+			@viewWidth = config.screenWidth
+			@
 
 		startDrag:(event)=>
 			return @ if @isAnimating
@@ -236,8 +245,6 @@ define (require, exports, module)->
 			@nextItem = @items[@_getNextItemIndex()]
 			@nextItem?.$el.addClass('active')
 
-			@viewWidth = @getWidth()
-
 			# @currentItem.$el.css('-webkit-transform', 'translate3d(-100px,0, 0)')
 			@
 
@@ -247,31 +254,50 @@ define (require, exports, module)->
 			point = event.touches?[0] ? event
 			@lastX = point.clientX
 			distanceX = @lastX-@startX
+			# console.log 'last:'+@lastX
+			# console.log 'start:'+@startX
 
 			if @dragging
-				if distanceX>1 or distanceX<-1
+				if Math.abs(distanceX) >1
+					# console.log @prevItem?.$el.css('-webkit-transform')
+					# console.log @nextItem?.$el.css('-webkit-transform')
+					# console.log @currentItem.$el.css('-webkit-transform')
 					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
 					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+				else return
+
+				if 20>Math.abs(distanceX)>1
+					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
+					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+				else if distanceX>20
+					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+				else if distanceX<-20
+					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
+					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+					
 			@
 
 		_swipeAnimate:(mainItem, subItem, uselessItem, direction, callback)->
 			@isAnimating = true
+			animateClass = 'animating-100'
 			subItem?.$el
-				.addClass('animating')
+				.addClass(animateClass)
 				.css('-webkit-transform', 'translate3d('+(@viewWidth*direction)+'px,0,0)')
 
 			mainItem.$el
-				.addClass('animating')
+				.addClass(animateClass)
 				.css('-webkit-transform', 'translate3d(0,0,0)')
 
 			setTimeout((=>
-				mainItem.$el.removeClass('animating')
-				subItem?.$el.removeClass('active animating')
+				mainItem.$el.removeClass(animateClass)
+				subItem?.$el.removeClass('active '+animateClass)
 				uselessItem?.$el.removeClass('active')
 				callback?()
 				@isAnimating =false
-			),250)
+			),100)
 			
 			@
 
@@ -304,6 +330,16 @@ define (require, exports, module)->
 
 			super(i)
 
+			item.$el.removeClass('fake-active') for item in @items
+			@items[@_getPrevItemIndex()]?.$el
+				.addClass('fake-active')
+				.css('-webkit-transform', 'translate3d('+(-@viewWidth)+'px,0, 0)')
+
+			@items[@_getNextItemIndex()]?.$el
+				.addClass('fake-active')
+				.css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
+
+
 		_renderItem:(panel, i)->
 			indicatorContainer = @$el.find('.carousel-indicator-container')
 			indicatorContainer.append(@indicatorItem)
@@ -312,36 +348,68 @@ define (require, exports, module)->
 			@$el.html('')
 			@$el.append(@indicatorTemplate)
 			super()
-			
-			
 
-
+			# @_renderItem panel,i for panel, i in @items
 
 	class Page extends Container
 		className:'page container'
-		
+
 	$(->
-		container = new CarouselContainer({id:'main-container'})
-			# .addItem(new Panel {id:'panel1'})
-			# .addItem(new Panel {id:'panel2'})
-			# .addItem(new Panel {id:'panel3'})
-			# .addItem(new Panel {id:'panel4'})
-		
-		# container = new TabContainer({id:'main-container'})
-			.addItem(new TabItem({
-				id:'panel1', 
-				template:require('./templates/test.html'), 
-				model:new Backbone.Model({title:'superwolf'})
+		window.config = new Config
+			
+		# quotesDetailCarousel = new CarouselContainer({id:'quotes-detail-carousel'})
+		# 	.addItem(new Container({
+		# 		id:'quotes-detail-avg-container',
+		# 		template:'quotes-detail-avg-container'
+		# 	}))
+		# 	.addItem(new Container({
+		# 		id:'quotes-detail-kline-container',
+		# 		template:'quotes-detail-kline-container'
+		# 	}))
+		# 	.addItem(new Container({
+		# 		id:'quotes-detail-handicap-container',
+		# 		template:'quotes-detail-handicap-container'
+		# 	}))
+		# 	.addItem(new Container({
+		# 		id:'quotes-detail-trade-container',
+		# 		template:'quotes-detail-trade-container'
+		# 	}))
+
+		quotesCardContainer = new CardContainer({id:'quotes-container'})
+			.addItem(new Container({
+				id:'quotes-market-container',
+				template:'quotes-market-container'
 			}))
-			.addItem(new TabItem({id:'panel2', model:new Backbone.Model({title:'superwolf'})}))
-			.addItem(new TabItem({id:'panel3', model:new Backbone.Model({title:'superwolf'})}))
-			.addItem(new TabItem({id:'panel4', model:new Backbone.Model({title:'superwolf'})}))
-		
-		container.render()
+			.addItem(new Container({
+				id:'quotes-list-container',
+				template:'quotes-list-container'
+			}))
+			# .addItem(quotesDetailCarousel)
 
 
+		mainTabContainer = new TabContainer({id:'main-container'})
+			# .addItem(quotesCardContainer)
+			.addItem(new TabItem({
+				id:'panel2', 
+				# template:'<h1>panel2</h1>', 
+				# template:require('./templates/test.tpl'),
+				template:require('./templates/listdata.tpl'),
+				model:new Backbone.Model({title:'panel2'})
+			}))
+			.addItem(new TabItem({
+				id:'panel3', 
+				# template:'<h1>panel3</h1>', 
+				template:require('./templates/listdata.tpl'),
+				model:new Backbone.Model({title:'panel3'})
+			}))
+			.addItem(new TabItem({
+				id:'panel4', 
+				# template:'<h1>panel4</h1>', 
+				template:require('./templates/listdata.tpl'),
+				model:new Backbone.Model({title:'panel4'})
+			}))		
 		$('body')
-			.append(container.el)
+			.append(mainTabContainer.render().$el)
 			.on('touchmove', (e)->e.preventDefault())
 			# .click->container.changeNextItem()
 	)
