@@ -37,6 +37,13 @@ define (require, exports, module)->
 	class Model extends Backbone.Model
 	class Container extends ViewBase
 		className:'container'
+		initialize:(@options)->
+			super(@options)
+			@items = []
+			@ 
+		getItemIndex:(actionItem)->
+			for item,i in @items
+				return i if actionItem is item
 
 	class CardContainer extends Container
 		className:"container card-container"
@@ -44,7 +51,6 @@ define (require, exports, module)->
 		isInfinite:false
 		initialize:(@options)->
 			super(@options)
-			@items = []
 			@ 
 
 		_setActiveItem:(toActiveItem)->
@@ -120,9 +126,10 @@ define (require, exports, module)->
 
 		render:=>
 			return @ if @items.length is 0
-			
+
 			@_renderItem panel,i for panel, i in @items
-			@_setActiveItem(0)
+			@changeItem(0) if @activeIndex is -1
+
 			@
 
 	class TabItemTitle extends Container
@@ -177,18 +184,32 @@ define (require, exports, module)->
 		tabTitleContainerTemplate: '<div class="tab-item-title-container"></div>'
 		tabPositionBottom: true
 
-		initialize:->
+		initialize:(@options)->
+			super(@options)
+			@activeIndex = -1
 			@contentContainer = new CardContainer
-			@items = []
 			@
+
 		addItem:(item)->
 			index = @items.length
 			@items.push item
 			@contentContainer.addItem item.contentView
 
 			item.on('active',=>
-				@contentContainer.changeItem(item.contentView)
+				@changeItem(@getItemIndex(item))
 			)
+			@
+
+		changeItem:(index)=>
+			return if index<0 or index>@items.length-1
+			for item,i in @items
+				if i is index
+					item.active()
+				else
+					item.deactive()
+			
+			@contentContainer.changeItem(@items[index].contentView)
+			@activeIndex = index
 			@
 
 		_renderTitle:->
@@ -199,6 +220,7 @@ define (require, exports, module)->
 			@
 
 		render:=>
+			@changeItem(0) if @activeIndex is -1
 			super()
 			if @tabPositionBottom
 				@$el.append @contentContainer.render().$el
