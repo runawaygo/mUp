@@ -6,7 +6,10 @@ define (require, exports, module)->
 			@template = @options?.template ? @template
 			@
 		getWidth:->
-			@$el.width()
+			width = @$el.width()
+			if width is 0 then width = $('body').width()
+			width
+			
 		active:->
 			@$el.addClass('active')
 			@

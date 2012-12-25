@@ -111,12 +111,12 @@ define (require, exports, module)->
 
 			@
 
-		_setActiveItem:(i)->
-			indicatorItems = @$el.find('.carousel-indicator-item')
-			$(indicatorItems[@activeIndex]).removeClass('active')
-			$(indicatorItems[i]).addClass('active')
+		_setActiveItem:(item)->
+			super(item)
 
-			super(i)
+			indicatorItems = @$el.find('.carousel-indicator-item')
+			indicatorItems.removeClass('active')
+			$(indicatorItems[@activeIndex]).addClass('active')
 
 			item.$el.removeClass('fake-active') for item in @items
 			@items[@_getPrevItemIndex()]?.$el
@@ -133,6 +133,8 @@ define (require, exports, module)->
 			indicatorContainer.append(@indicatorItem)
 			super(panel, i)
 		render:=>
+			@viewWidth ?= @getWidth()
+			console.log @viewWidth
 			@$el.html('')
 			@$el.append(@indicatorTemplate)
 			super()

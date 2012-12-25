@@ -6,9 +6,6 @@ define (require, exports, module)->
 	TabItem = require("../mUp/view/control/TabItem")
 	TabContainer = require("../mUp/view/control/TabContainer")
 	animate = require('./utility/animate')
-	console.log animate
-
-	console.log require("../mUp/view/control/ViewBase")
 
 	$(->
 		# window.config = new Config
