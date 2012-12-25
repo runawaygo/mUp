@@ -1,0 +1,20 @@
+@-webkit-keyframes swipe-right-out {
+	from {-webkit-transform: translate3d(0,0,0);}	
+	to {-webkit-transform: translate3d(320px,0,0);}	
+}
+
+@-webkit-keyframes swipe-right-in {
+	from {-webkit-transform: translate3d(-320px,0,0);}	
+	to {-webkit-transform: translate3d(0,0,0);}	
+}
+
+
+@-webkit-keyframes swipe-left-out {
+	from {-webkit-transform: translate3d(0,0,0);}	
+	to {-webkit-transform: translate3d(-320px,0,0);}	
+}
+
+@-webkit-keyframes swipe-left-in {
+	from {-webkit-transform: translate3d(320px,0,0);}	
+	to {-webkit-transform: translate3d(0,0,0);}	
+}
