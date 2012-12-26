@@ -40,7 +40,7 @@ body{
 	display:block;
 	position:relative;
 	overflow:hidden;
-	.container, .panel{
+	>.container, >.panel{
 		display:none;
 		position:absolute;
 		top:0px;
@@ -94,5 +94,13 @@ body{
 	&.active{
 		background: red;
 		color: white;
+	}
+}
+
+.list{
+	.wrapper{
+		position:absolute;
+		top:0;
+		height:100%;
 	}
 }

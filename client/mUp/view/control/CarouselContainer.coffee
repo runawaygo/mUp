@@ -49,13 +49,13 @@ define (require, exports, module)->
 			distanceX = @lastX-@startX
 
 			if @dragging
-				if Math.abs(distanceX) >1
+				if Math.abs(distanceX) >10
 					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
 					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
 				else return
 
-				if 20>Math.abs(distanceX)>1
+				if 20>Math.abs(distanceX)>10
 					@prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
 					@nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
 					@currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')

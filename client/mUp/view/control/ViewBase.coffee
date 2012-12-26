@@ -11,10 +11,16 @@ define (require, exports, module)->
 			width
 			
 		active:->
+			@trigger('show')
 			@$el.addClass('active')
 			@
 		deactive:->
-			@$el.removeClass('active')
+			@trigger('hide')
+			setTimeout(=>
+				@$el.removeClass('active')
+
+			,100)
+			
 			@
 		render:=>
 			@$el.html(@template)
