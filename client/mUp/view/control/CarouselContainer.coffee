@@ -43,6 +43,9 @@ define (require, exports, module)->
 
 		onDrag:(event)=>
 			return @ if not @dragging 
+			return @ if event.stopCarousel
+			# console.log event.stop
+
 			
 			point = event.touches?[0] ? event
 			@lastX = point.clientX

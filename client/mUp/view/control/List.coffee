@@ -10,15 +10,15 @@ define (require, exports, module)->
 			@on('show', @initList)
 			@
 		initEvent:=>
-			# @$el.on({
-			# 	'mousedown':@startDrag
-			# 	'mousemove':@onDrag
-			# 	'mouseup':@endDrag
+			@$el.on({
+				'mousedown':@startDrag
+				'mousemove':@onDrag
+				'mouseup':@endDrag
 
-			# 	'touchstart':@startDrag
-			# 	'touchmove':@onDrag
-			# 	'touchend':@endDrag
-			# })
+				'touchstart':@startDrag
+				'touchmove':@onDrag
+				'touchend':@endDrag
+			})
 			@
 			
 		initList:=>
@@ -33,17 +33,20 @@ define (require, exports, module)->
 			@
 
 		onDrag:(event)=>
-			return @ if not @dragging 
+			return @ if not @dragging
+			if @scrolling 
+				event.stopCarousel = true
+				return @
 			
 			point = event.touches?[0] ? event
 			if Math.abs(point.clientX-@startPoint.x)<Math.abs(point.clientY-@startPoint.y)
-				console.log 'stop'
-				
-				event.stopPropagation()
+				@scrolling = true
+
 			@
 
 		endDrag:(event)=>
 			@dragging = false
+			@scrolling = false
 			@
 		addItem:(item)=>
 			@items.push(item)
