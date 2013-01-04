@@ -9,7 +9,7 @@
 	url = git://github.com/madrobby/zepto.git
 [submodule "client/vendors/cssmixins"]
 	path = client/vendors/cssmixins
-	url = git://github.com/MatthewWagerfield/cssmixins.git
+	url = git://github.com/wagerfield/cssmixins.git
 [submodule "client/vendors/backbone"]
 	path = client/vendors/backbone
 	url = git://github.com/documentcloud/backbone.git
