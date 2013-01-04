@@ -5,6 +5,7 @@ define (require, exports, module)->
 	CardContainer = require("../mUp/view/control/CardContainer")
 	TabItem = require("../mUp/view/control/TabItem")
 	TabContainer = require("../mUp/view/control/TabContainer")
+	TitleBar = require("../mUp/view/control/TitleBar")
 	List = require("../mUp/view/control/List")
 	
 	animate = require('./utility/animate')
@@ -23,11 +24,13 @@ define (require, exports, module)->
 			template:require('./templates/list.tpl')
 		})
 		quotesDetailCarousel = new CarouselContainer({id:'quotes-detail-carousel'})
-			.addItem(testList2)
 			.addItem(new Container({
 				id:'quotes-detail-avg-container',
-				template:'quotes-detail-avg-container'
+				items:[new TitleBar({
+					title:'superowlf!!!!'
+				})]
 			}))
+			.addItem(testList2)
 			.addItem(new Container({
 				id:'quotes-detail-kline-container',
 				template:'quotes-detail-kline-container'
@@ -44,7 +47,7 @@ define (require, exports, module)->
 		quotesCardContainer = new CardContainer({id:'quotes-container'})
 			.addItem(quotesDetailCarousel)
 			.addItem(new Container({
-				id:'quotes-market-container',
+				id:'quotes-market-container'
 				template:'quotes-market-container'
 			}))
 			.addItem(new Container({
@@ -58,7 +61,7 @@ define (require, exports, module)->
 				# template:'<h1>panel2</h1>', 
 				# template:require('./templates/test.tpl'),
 				contentView: quotesCardContainer
-				model:new Backbone.Model({title:'panel2'})
+				model:new Backbone.Model({title:'panel1'})
 			}))
 			.addItem(new TabItem({
 				id:'panel2'

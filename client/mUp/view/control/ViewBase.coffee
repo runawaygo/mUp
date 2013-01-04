@@ -9,19 +9,7 @@ define (require, exports, module)->
 			width = @$el.width()
 			if width is 0 then width = $('body').width()
 			width
-			
-		active:->
-			@trigger('show')
-			@$el.addClass('active')
-			@
-		deactive:->
-			@trigger('hide')
-			setTimeout(=>
-				@$el.removeClass('active')
-
-			,100)
-			
-			@
+		
 		render:=>
 			@$el.html(@template)
 			@

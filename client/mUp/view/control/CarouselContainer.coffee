@@ -142,6 +142,5 @@ define (require, exports, module)->
 			@$el.append(@indicatorTemplate)
 			super()
 
-			# @_renderItem panel,i for panel, i in @items
 	exports = module.exports = CarouselContainer
 	exports

@@ -43,7 +43,6 @@ define (require, exports, module)->
 
 		render:=>
 			@changeItem(0) if @activeIndex is -1
-			super()
 			if @tabPositionBottom
 				@$el.append @contentContainer.render().$el
 				@_renderTitle()
