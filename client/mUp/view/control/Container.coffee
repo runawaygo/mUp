@@ -2,9 +2,11 @@ define (require, exports, module)->
 	ViewBase = require('./ViewBase')
 	class Container extends ViewBase
 		className:'container'
+		layout:'vbox'
 		initialize:(@options)->
 			super(@options)
 			@items = @options?.items ? []
+			@$el.addClass(@options.layout) if @options?.layout
 			@ 
 		getItemIndex:(actionItem)->
 			for item,i in @items
@@ -20,10 +22,14 @@ define (require, exports, module)->
 			,100)
 			
 			@
+		_renderItem:(panel, i)->
+			@$el.append(panel.render().el)
+			@
+
 		render:=>
 			super()
-			@$el.addClass(@options.layout) if @options?.layout
-			@$el.append item.render().el for item in @items
+			return @ if @items.length is 0
+			@_renderItem panel,i for panel, i in @items
 			@
 
 	exports = module.exports = Container

@@ -8,9 +8,19 @@ define (require, exports, module)->
 		rightPanelTemplate:'<button>superwolf-right</button><button>superwolf-right</button>'
 		initialize:(@options)->
 			super(@options)
-			@title = options.title
+			@title = options?.title
 			@
+		setTitle:(title)->
+			@$('h1').html(title)
+			@
+		setLeftPanel:(view)->
+			@leftPanel.html(view)
+			@
+		setRightPanel:(view)->
+			@rightPanel.html(view)
+			@			
 		render:=>
+			super()
 			@$el.html(_.template(@template, {title:@title}))
 
 			@leftPanel = @$el.find('.left-panel') 

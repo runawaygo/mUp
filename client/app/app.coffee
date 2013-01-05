@@ -5,6 +5,8 @@ define (require, exports, module)->
 	CardContainer = require("../mUp/view/control/CardContainer")
 	TabItem = require("../mUp/view/control/TabItem")
 	TabContainer = require("../mUp/view/control/TabContainer")
+	NavigationContainer = require("../mUp/view/control/NavigationContainer")
+
 	TitleBar = require("../mUp/view/control/TitleBar")
 	List = require("../mUp/view/control/List")
 	
@@ -22,14 +24,22 @@ define (require, exports, module)->
 			id:'superwolf1'
 			template:require('./templates/list.tpl')
 		})
+		navigationTest = new NavigationContainer({
+			layout:'vbox'
+			items:[new Container({
+				id:'superwolf'
+				title:'superowlf!!!!'
+				template:'superwolf wow'
+			})]
+		})
 		quotesDetailCarousel = new CarouselContainer({id:'quotes-detail-carousel'})
+			.addItem(navigationTest)
 			.addItem(new Container({
 				id:'quotes-detail-avg-container'
 				layout:'vbox'
-				items:[new TitleBar({
-					id:'avg-title-bar'
+				items:[new Container({
 					title:'superowlf!!!!'
-
+					template:'superwolf wow'
 				})]
 			}))
 			.addItem(testList2)
@@ -88,6 +98,17 @@ define (require, exports, module)->
 			.append(mainTabContainer.render().$el)
 			.on('touchmove', (e)->e.preventDefault())
 			# .click->container.changeNextItem()
+			setTimeout(->
+				navigationTest.push(new Container({
+					title:'bluewing'
+					id:'bluewing'
+					template:'bluewing wow'
+				}),{animate:true})
+			,1000)
+			setTimeout(->
+				view = navigationTest.pop({animate:true})
+				console.log view
+			,2000)
 
 	)
 	module.exports = {}
