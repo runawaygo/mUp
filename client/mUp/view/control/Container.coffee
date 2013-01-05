@@ -22,6 +22,7 @@ define (require, exports, module)->
 			@
 		render:=>
 			super()
+			@$el.addClass(@options.layout) if @options?.layout
 			@$el.append item.render().el for item in @items
 			@
 

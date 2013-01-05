@@ -10,7 +10,6 @@ define (require, exports, module)->
 	
 	animate = require('./utility/animate')
 
-
 	$(->
 		# window.config = new Config
 
@@ -25,9 +24,12 @@ define (require, exports, module)->
 		})
 		quotesDetailCarousel = new CarouselContainer({id:'quotes-detail-carousel'})
 			.addItem(new Container({
-				id:'quotes-detail-avg-container',
+				id:'quotes-detail-avg-container'
+				layout:'vbox'
 				items:[new TitleBar({
+					id:'avg-title-bar'
 					title:'superowlf!!!!'
+
 				})]
 			}))
 			.addItem(testList2)

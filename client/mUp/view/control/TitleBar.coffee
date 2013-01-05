@@ -4,20 +4,22 @@ define (require, exports, module)->
 	class TitleBar extends Container
 		className:'title-bar'
 		template:'<div class="left-panel"></div><h1><%= title %></h1><div class="right-panel"></div>'
-		leftItems:[]
-		rightItems:[]
+		leftPanelTemplate:'<button>superwolf-left</button>'
+		rightPanelTemplate:'<button>superwolf-right</button><button>superwolf-right</button>'
 		initialize:(@options)->
 			super(@options)
 			@title = options.title
 			@
 		render:=>
 			@$el.html(_.template(@template, {title:@title}))
-			
+
 			@leftPanel = @$el.find('.left-panel') 
-			@leftPanel.append item.render().el for item in @leftItems
+			# @leftPanel.append item.render().el for item in @leftItems
+			@leftPanel.append @leftPanelTemplate
 
 			@rightPanel = @$el.find('.right-panel') 
-			@rightPanel.append item.render().el for item in @leftItems
+			# @rightPanel.append item.render().el for item in @leftItems
+			@rightPanel.append @rightPanelTemplate
 
 			@
 

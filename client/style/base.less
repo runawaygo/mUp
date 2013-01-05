@@ -22,13 +22,20 @@ body{
   background-repeat: repeat-x;
   background-position: 0 40px;
 }
+
+.vbox{
+	-webkit-box-orient:vertical;
+}
+.hbox{
+	-webkit-box-orient:horizontal;	
+}
 .animating{
 	-webkit-transition:all 200ms linear 0;
 }
 
 .title-bar{
 	display:block;
-	-webkit-box-flex: 1;
+	-webkit-box-flex: 0;
 	position:relative;
 	height:40px;
 	.left-panel{
@@ -37,12 +44,12 @@ body{
 		position:absolute;
 		height:100%;
 		padding:2px;
-
 	}
 	h1{
 		padding:0 3px;
 		margin:0;
-		font-size:20px;
+		font-size:26px;
+		line-height: 40px;
 		text-align: center;
 	}
 	.right-panel{
@@ -51,7 +58,6 @@ body{
 		position:absolute;
 		height:100%;
 		padding:2px;
-
 	}
 }
 
@@ -62,8 +68,7 @@ body{
 }
 .panel,.container{
 	display:-webkit-box;
-	-webkit-box-orient:vertical;
-	-webkit-box-flex: 1;	
+	-webkit-box-flex: 1;
 }
 
 .card-container{
@@ -80,7 +85,7 @@ body{
 		height:100%;
 		
 		&.active, &.fake-active{
-			display:block;
+			display:-webkit-box;
 		}
 	}
 }
