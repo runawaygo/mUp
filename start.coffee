@@ -1,4 +1,6 @@
-connect = require('connect');
+connect = require 'connect'
+require 'coffee-script'
+mockData = require './server/mock'
 
 port = process.env.PORT || 8001;
 console.log("service run on " + port);
@@ -13,6 +15,10 @@ app = connect()
 .use(connect.bodyParser())
 .use('/', connect.static(__dirname + '/client/'))
 .use('/client', connect.static(__dirname + '/client/'))
-.listen(port)
+
+mockData(app)
+app.listen(port)
+
+
 
 

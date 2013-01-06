@@ -6,23 +6,25 @@ define (require, exports, module)->
 	TabItem = require("../mUp/view/control/TabItem")
 	TabContainer = require("../mUp/view/control/TabContainer")
 	NavigationContainer = require("../mUp/view/control/NavigationContainer")
+	Toolbar = require("../mUp/view/control/Toolbar")
 
 	TitleBar = require("../mUp/view/control/TitleBar")
 	List = require("../mUp/view/control/List")
 	
 	animate = require('./utility/animate')
-
 	$(->
 		# window.config = new Config
 
 		testList = new List({
 			id:'superwolf'
 			template:require('./templates/list.tpl')
+			scrollable:true
 		})
 
 		testList2 = new List({
 			id:'superwolf1'
 			template:require('./templates/list.tpl')
+			scrollable:true
 		})
 		navigationTest = new NavigationContainer({
 			layout:'vbox'
@@ -33,15 +35,25 @@ define (require, exports, module)->
 			})]
 		})
 		quotesDetailCarousel = new CarouselContainer({id:'quotes-detail-carousel'})
-			.addItem(navigationTest)
 			.addItem(new Container({
 				id:'quotes-detail-avg-container'
 				layout:'vbox'
-				items:[new Container({
-					title:'superowlf!!!!'
-					template:'superwolf wow'
-				})]
+				items:[
+					new Toolbar({
+						items:[
+							{title:'5分钟'}
+							{title:'10分钟'}
+							{title:'15分钟'}
+							{title:'20分钟'}
+						]
+					})
+					new Container({
+						title:'superowlf!!!!'
+						template:'superwolf wow'
+					})
+				]
 			}))
+			.addItem(navigationTest)
 			.addItem(testList2)
 			.addItem(new Container({
 				id:'quotes-detail-kline-container',
@@ -98,17 +110,28 @@ define (require, exports, module)->
 			.append(mainTabContainer.render().$el)
 			.on('touchmove', (e)->e.preventDefault())
 			# .click->container.changeNextItem()
-			setTimeout(->
-				navigationTest.push(new Container({
-					title:'bluewing'
-					id:'bluewing'
-					template:'bluewing wow'
-				}),{animate:true})
-			,1000)
-			setTimeout(->
-				view = navigationTest.pop({animate:true})
-				console.log view
-			,2000)
+			# setTimeout(->
+			# 	navigationTest.push(new Container({
+			# 		title:'bluewing'
+			# 		template:'bluewing wow'
+			# 	}),{animate:true})
+			# ,1000)
+			# setTimeout(->
+			# 	navigationTest.push(new Container({
+			# 		title:'bluewing1'
+			# 		template:'bluewing wow'
+			# 	}),{animate:true})
+			# ,2000)
+			# setTimeout(->
+			# 	navigationTest.push(new Container({
+			# 		title:'bluewing2'
+			# 		template:'bluewing wow'
+			# 	}),{animate:true})
+			# ,3000)
+			# setTimeout(->
+			# 	view = navigationTest.pop({animate:true})
+			# 	console.log view
+			# ,2000)
 
 	)
 	module.exports = {}

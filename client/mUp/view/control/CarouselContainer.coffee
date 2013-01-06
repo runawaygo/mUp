@@ -137,7 +137,6 @@ define (require, exports, module)->
 			super(panel, i)
 		render:=>
 			@viewWidth ?= @getWidth()
-			console.log @viewWidth
 			@$el.html('')
 			@$el.append(@indicatorTemplate)
 			super()

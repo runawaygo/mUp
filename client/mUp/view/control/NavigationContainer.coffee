@@ -6,6 +6,11 @@ define (require, exports, module)->
 	class NavigationContainer extends Container
 		className:"container navigation-container"
 		contentContainerTemplate:"<div class='content-container'></div>"
+		backButtonTemplate:"<a class='btn btn-back'>back</a>"
+		actionButtonTemplate:""
+		events:
+			'tap .btn-back':'pop'
+			'click .btn-back':'pop'			
 		initialize:(@options)->
 			super(@options)
 			@titleBar = new TitleBar
@@ -18,15 +23,16 @@ define (require, exports, module)->
 			@busy = true
 			oldItem = @currentItem
 			@currentItem = item
+			@items.push(oldItem)
 			@renderCurrentItem()
+			
 
-			console.log animate
 			if options?.animate?
 				@titleBar.$('h1').animate(animate.style.swipeLeft.in, {duration: 200})
 				animate(oldItem, @currentItem, animate.style.swipeLeft, =>
 					@busy = false
 					oldItem.$el.remove()
-					@items.push(oldItem)
+					
 				)
 			else
 				@busy = false
@@ -43,19 +49,17 @@ define (require, exports, module)->
 			@currentItem.$el.remove()
 			@renderCurrentItem()
 
-			if options?.animate?
+			if options?.animate? or true
 				@titleBar.$('h1').animate(animate.style.swipeRight.in, {duration: 200})
 				animate(oldItem, @currentItem, animate.style.swipeRight, =>
 					@busy = false
 					oldItem.$el.remove()
-					@items.push(oldItem)
-					console.log 'animate'
+					
 				)
 			else
 				@busy = false
 				oldItem.$el.remove()
 				@items.push(oldItem)
-				console.log 'sb'
 
 			oldItem
 		
@@ -63,8 +67,13 @@ define (require, exports, module)->
 			@currentItem.render() if @currentItem.el.innerHTML is ''	
 			@$('.content-container').append(@currentItem.el)
 			@titleBar.setTitle(@currentItem.options.title)
-			@titleBar.setLeftPanel('<button>back</button>')
-			@titleBar.setRightPanel('<button>detail</button>')
+			console.log @items.length
+			if @items.length > 0
+				@titleBar.setLeftPanel(@backButtonTemplate)
+			else
+				@titleBar.setLeftPanel("")
+
+			@titleBar.setRightPanel(@actionButtonTemplate)
 			@
 
 		render:=>

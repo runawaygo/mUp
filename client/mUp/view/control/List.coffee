@@ -4,24 +4,22 @@ define (require, exports, module)->
 		className:'container list'
 		template:'<div class="wrapper"><div class="content-container"></div></div>'
 		@startPoint:{x:0, y:0}
+		events:
+			'mousedown':'startDrag'
+			'mousemove':'onDrag'
+			'mouseup':'endDrag'
+
+			'touchstart':'startDrag'
+			'touchmove':'onDrag'
+			'touchend':'endDrag'
 		initialize:(@option)->
 			super(@option)
-			@initEvent()
+			@scrollable = @options?.scrollable ? true
 			@on('show', @initList)
 			@
-		initEvent:=>
-			@$el.on({
-				'mousedown':@startDrag
-				'mousemove':@onDrag
-				'mouseup':@endDrag
-
-				'touchstart':@startDrag
-				'touchmove':@onDrag
-				'touchend':@endDrag
-			})
-			@
-			
+		
 		initList:=>
+			return @ if not @scrollable
 			return @ if @scrollVierw
 			setTimeout(=>
 				@scrollVierw = new iScroll(@$el.find('.wrapper')[0])
