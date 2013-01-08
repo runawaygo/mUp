@@ -1,1 +1,1 @@
-coffee -o ../client/app -wc ../client/app
+coffee -b -o ../app -wc ../app

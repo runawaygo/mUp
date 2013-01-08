@@ -1,1 +1,1 @@
-coffee -o ../client/mUp -wc ../client/mUp
+coffee -b -o .. -wc ..
