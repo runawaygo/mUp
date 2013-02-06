@@ -129,7 +129,7 @@ define (require, exports, module)->
 				model:new Backbone.Model({title:'panel4'})
 			}))		
 		$('body')
-			.append(mainTabContainer.render().$el)
+			.append(testCarouselTabContainer.render().$el.css('height', "100%"))
 			.on('touchmove', (e)->e.preventDefault())
 
 	)

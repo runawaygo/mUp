@@ -1,3 +1,4 @@
+@import 'mUp/style/animate.css';
 *{
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
 	-webkit-user-select: none;
@@ -83,6 +84,17 @@ body{
 			display:-webkit-box;
 		}
 	}
+}
+
+.carousel-container{
+	&.dragging{
+		>.container, >.panel{
+		  -webkit-transition:-webkit-transform 0 ease 0;
+		}
+	}
+  >.container, >.panel{
+    -webkit-transition:-webkit-transform 2000ms ease 0;
+  }
 }
 .carousel-indicator-container{
 	display:block;	

@@ -25,10 +25,7 @@ define (require, exports, module)->
 		changeItem:(index)=>
 			return if index<0 or index>@items.length-1
 			for item,i in @items
-				if i is index
-					item.active()
-				else
-					item.deactive()
+				if i is index then item.active() else item.deactive()
 
 			@contentContainer.changeItem(index)
 			@activeIndex = index

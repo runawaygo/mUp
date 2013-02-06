@@ -8,7 +8,6 @@ define (require, exports, module)->
 			@title = options.title
 			@titleView = new TabItemTitle({model:@model})
 			@titleView.on('active',=>@trigger('active', @))
-			# console.log @options
 			@contentView = @options.contentView ? new Container(@options)
 			@
 		active:=>

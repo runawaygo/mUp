@@ -6,7 +6,7 @@ define (require, exports, module)->
 		className:"container tab-container carousel-tab-container"
 		tabTitleContainerTemplate: '<div class="tab-item-title-container"></div>'
 		tabPositionBottom: false
-		disableIndicator: false
+		disableIndicator: true
 		initialize:(@options)->
 			super(@options)
 			@contentContainer = new CarouselContainer {disableIndicator: @disableIndicator}
