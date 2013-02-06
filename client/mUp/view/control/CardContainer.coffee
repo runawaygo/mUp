@@ -83,7 +83,6 @@ define (require, exports, module)->
 
 			@_renderItem panel,i for panel, i in @items
 			@changeItem(0) if @activeIndex is -1
-
 			@
 
 	exports = module.exports = CardContainer

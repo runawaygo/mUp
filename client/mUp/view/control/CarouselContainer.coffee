@@ -4,9 +4,11 @@ define (require, exports, module)->
 		startX:0
 		lastX:0
 		dragging:false
+		disableIndicator: false
 		className:"container card-container carousel-container"
 		indicatorTemplate:'<div class="carousel-indicator-container"></div>'
 		indicatorItem:'<div class="carousel-indicator-item"></div>'
+
 		events:
 			'mousedown':'startDrag'
 			'mousemove':'onDrag'
@@ -18,6 +20,7 @@ define (require, exports, module)->
 		initialize:(@options)->
 			super(@options)
 			@viewWidth=null
+			@disableIndicator = @options.disableIndicator ? @disableIndicator 
 			@
 
 		startDrag:(event)=>
@@ -116,10 +119,15 @@ define (require, exports, module)->
 
 		_setActiveItem:(item)->
 			super(item)
-
-			indicatorItems = @$el.find('.carousel-indicator-item')
-			indicatorItems.removeClass('active')
-			$(indicatorItems[@activeIndex]).addClass('active')
+			console.log @activeIndex
+			console.log @viewWidth
+			console.log @_getPrevItemIndex()
+			console.log @_getNextItemIndex()
+			console.log @items
+			if not @disableIndicator
+				indicatorItems = @$el.find('.carousel-indicator-item')
+				indicatorItems.removeClass('active')
+				$(indicatorItems[@activeIndex]).addClass('active')
 
 			item.$el.removeClass('fake-active') for item in @items
 			@items[@_getPrevItemIndex()]?.$el
@@ -132,13 +140,12 @@ define (require, exports, module)->
 
 
 		_renderItem:(panel, i)->
-			indicatorContainer = @$el.find('.carousel-indicator-container')
-			indicatorContainer.append(@indicatorItem)
+			@$el.find('.carousel-indicator-container').append(@indicatorItem) if not @disableIndicator
 			super(panel, i)
 		render:=>
 			@viewWidth ?= @getWidth()
 			@$el.html('')
-			@$el.append(@indicatorTemplate)
+			@$el.append(@indicatorTemplate) if not @disableIndicator
 			super()
 
 	exports = module.exports = CarouselContainer

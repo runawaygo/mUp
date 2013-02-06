@@ -2,8 +2,10 @@ define (require, exports, module)->
 	base = '../mUp/view/control'
 	Container = require("../mUp/view/control/Container")
 	CarouselContainer = require("../mUp/view/control/CarouselContainer")
+	CarouselTabContainer = require("../mUp/view/control/CarouselTabContainer")
 	CardContainer = require("../mUp/view/control/CardContainer")
 	TabItem = require("../mUp/view/control/TabItem")
+
 	TabContainer = require("../mUp/view/control/TabContainer")
 	NavigationContainer = require("../mUp/view/control/NavigationContainer")
 	Toolbar = require("../mUp/view/control/Toolbar")
@@ -79,20 +81,40 @@ define (require, exports, module)->
 				template:'quotes-list-container'
 			}))
 
+		testCarouselTabContainer = new CarouselTabContainer(id:'carousel-tab-container')
+			.addItem(new TabItem({
+				id:'carousel-tab-1'
+				template:'<h1>carousel-tab-1</h1>'
+				# template:require('./templates/test.tpl'),
+				model:new Backbone.Model({title:'panel1'})
+			}))
+			.addItem(new TabItem({
+				id:'carousel-tab-2'
+				template:'<h1>carousel-tab-2</h1>'
+				# template:require('./templates/test.tpl'),
+				model:new Backbone.Model({title:'panel1'})
+			}))
+			.addItem(new TabItem({
+				id:'carousel-tab-3'
+				template:'<h1>carousel-tab-3</h1>'
+				# template:require('./templates/test.tpl'),
+				model:new Backbone.Model({title:'panel1'})
+			}))
+
 		mainTabContainer = new TabContainer({id:'main-container'})
+			.addItem(new TabItem({
+				id:'panel2'
+				# template:'<h1>panel2</h1>'
+				# template:require('./templates/test.tpl'),
+				contentView:testCarouselTabContainer
+				model:new Backbone.Model({title:'panel2'})
+			}))
 			.addItem(new TabItem({
 				id:'panel1'
 				# template:'<h1>panel2</h1>', 
 				# template:require('./templates/test.tpl'),
 				contentView: quotesCardContainer
 				model:new Backbone.Model({title:'panel1'})
-			}))
-			.addItem(new TabItem({
-				id:'panel2'
-				# template:'<h1>panel2</h1>', 
-				# template:require('./templates/test.tpl'),
-				template:require('./templates/listdata.tpl')
-				model:new Backbone.Model({title:'panel2'})
 			}))
 			.addItem(new TabItem({
 				id:'panel3'
@@ -109,29 +131,6 @@ define (require, exports, module)->
 		$('body')
 			.append(mainTabContainer.render().$el)
 			.on('touchmove', (e)->e.preventDefault())
-			# .click->container.changeNextItem()
-			# setTimeout(->
-			# 	navigationTest.push(new Container({
-			# 		title:'bluewing'
-			# 		template:'bluewing wow'
-			# 	}),{animate:true})
-			# ,1000)
-			# setTimeout(->
-			# 	navigationTest.push(new Container({
-			# 		title:'bluewing1'
-			# 		template:'bluewing wow'
-			# 	}),{animate:true})
-			# ,2000)
-			# setTimeout(->
-			# 	navigationTest.push(new Container({
-			# 		title:'bluewing2'
-			# 		template:'bluewing wow'
-			# 	}),{animate:true})
-			# ,3000)
-			# setTimeout(->
-			# 	view = navigationTest.pop({animate:true})
-			# 	console.log view
-			# ,2000)
 
 	)
 	module.exports = {}

@@ -29,26 +29,25 @@ define (require, exports, module)->
 					item.active()
 				else
 					item.deactive()
-			
-			@contentContainer.changeItem(@items[index].contentView)
+
+			@contentContainer.changeItem(index)
 			@activeIndex = index
 			@
 
 		_renderTitle:->
 			@$el.append @tabTitleContainerTemplate
-			@$titleContainer = @$el.find('.tab-item-title-container')
+			@$titleContainer = @$el.children('.tab-item-title-container').first()
 			@$titleContainer.append(panel.titleView.render().$el) for panel in @items
-				
 			@
 
 		render:=>
-			@changeItem(0) if @activeIndex is -1
 			if @tabPositionBottom
 				@$el.append @contentContainer.render().$el
 				@_renderTitle()
 			else
 				@_renderTitle()
 				@$el.append @contentContainer.render().$el
+			@changeItem(0) if @activeIndex is -1
 			@
 
 	exports = module.exports = TabContainer

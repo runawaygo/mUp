@@ -67,7 +67,7 @@ define (require, exports, module)->
 			@currentItem.render() if @currentItem.el.innerHTML is ''	
 			@$('.content-container').append(@currentItem.el)
 			@titleBar.setTitle(@currentItem.options.title)
-			console.log @items.length
+
 			if @items.length > 0
 				@titleBar.setLeftPanel(@backButtonTemplate)
 			else
