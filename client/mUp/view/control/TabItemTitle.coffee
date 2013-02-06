@@ -4,22 +4,22 @@ define (require, exports, module)->
 		className:'container tab-item-title'
 		template:'<%= title %>'
 		events:
-			'touchstart': 'addPressingClass'
-			'mousedown'	: 'addPressingClass'
+			'touchstart' : 'addPressingClass'
+			'mousedown'  : 'addPressingClass'
 
-			'touchend'	: 'removePressingClass'
-			'mouseup'	: 'removePressingClass'
-
-			'tap'		: 'onTap'
-			'click'		: 'onTap'
+			'touchend'   : 'removePressingClass'
+			'mouseup'    : 'removePressingClass'
 		onTap:=>
 			@trigger 'active'
 			@
 		addPressingClass:=>
 			@$el.addClass('pressing')
+			@isPressing = true
 			@
 		removePressingClass:=>
-			@$el.removeClass('pressing')
+			if @isPressing
+				@trigger 'active'
+				@$el.removeClass('pressing')
 			@
 		
 		render:->
