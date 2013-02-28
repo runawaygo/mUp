@@ -1,16 +1,21 @@
 define (require, exports, module)->
-	TabContainer = require('./TabContainer')
-	CarouselContainer = require('./CarouselContainer')
+  animate = require('../../utl/animate')
+  TabContainer = require('./TabContainer')
+  CarouselContainer = require('./CarouselContainer')
 
-	class CarouselTabContainer extends TabContainer
-		className:"container tab-container carousel-tab-container"
-		tabTitleContainerTemplate: '<div class="tab-item-title-container"></div>'
-		tabPositionBottom: false
-		disableIndicator: true
-		initialize:(@options)->
-			super(@options)
-			@contentContainer = new CarouselContainer {disableIndicator: @disableIndicator}
-			@
+  class CarouselTabContainer extends TabContainer
+    className:"container tab-container carousel-tab-container"
+    tabTitleContainerTemplate: '<div class="tab-item-title-container"></div>'
+    tabPositionBottom: false
+    disableIndicator: true
+    initialize:(@options)->
+      super(@options)
+      @
+    initContentContainer:-> @contentContainer = new CarouselContainer {disableIndicator: @disableIndicator}
+    _changeContainerItem:(index)->
+      animateStyle = if @activeIndex < index then animate.style.swipeLeft else animate.style.swipeRight
+      @contentContainer.changeItem(index, {animate:animateStyle})
 
-	exports = module.exports = CarouselTabContainer
-	exports
+
+  exports = module.exports = CarouselTabContainer
+  exports

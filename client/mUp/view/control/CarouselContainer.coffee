@@ -42,7 +42,9 @@ define (require, exports, module)->
       @nextItem = @items[@_getNextItemIndex()]
       @nextItem?.$el.addClass('active')
 
-      # @currentItem.$el.css('-webkit-transform', 'translate3d(-100px,0, 0)')
+      @prevItem?.$el.css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
+      @nextItem?.$el.css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
+      @currentItem.$el.css('-webkit-transform', 'translate3d(0,0, 0)')
       @
 
     onDrag:(event)=>
@@ -54,6 +56,12 @@ define (require, exports, module)->
       point = event.touches?[0] ? event
       @lastX = point.clientX
       distanceX = @lastX-@startX
+
+      if @dragging
+        @prevItem?.$el.css('-webkit-transform', 'translate3d('+(distanceX-@viewWidth)+'px,0, 0)')
+        @nextItem?.$el.css('-webkit-transform', 'translate3d('+(@viewWidth + distanceX)+'px,0, 0)')
+        @currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
+      return @
 
       if @dragging
         if Math.abs(distanceX) >10
@@ -74,7 +82,6 @@ define (require, exports, module)->
           @currentItem.$el.css('-webkit-transform', 'translate3d('+distanceX+'px,0, 0)')
           
       @
-
     _swipeAnimate:(mainItem, subItem, uselessItem, direction, callback)->
       @isAnimating = true
       animateClass = 'animating-100'
@@ -105,29 +112,24 @@ define (require, exports, module)->
       speed =  distanceX/(endDate-@startDate)
 
       if (percentage>0.35 or speed>0.5) and @prevItem
-        @_swipeAnimate @prevItem,@currentItem,@nextItem,1,=>@_setActiveItem(@_getPrevItemIndex())
+        @_swipeAnimate @prevItem,@currentItem,@nextItem,1,=>@_afterAnimation(@_getPrevItemIndex())
       else if (0<percentage)
         @_swipeAnimate @currentItem,@prevItem,@nextItem,-1
       else if (percentage<-0.35 or speed<-0.5) and @nextItem
-        @_swipeAnimate @nextItem,@currentItem,@prevItem,-1,=>@_setActiveItem(@_getNextItemIndex())
+        @_swipeAnimate @nextItem,@currentItem,@prevItem,-1,=>@_afterAnimation(@_getNextItemIndex())
         
       else if (percentage<0)
         @_swipeAnimate @currentItem,@nextItem,@prevItem,1
 
       @dragging = false
       @$el.removeClass 'dragging'
-
       @
 
-    _setActiveItem:(item)->
-      super(item)
-      if not @disableIndicator
-        indicatorItems = @$el.find('.carousel-indicator-item')
-        indicatorItems.removeClass('active')
-        $(indicatorItems[@activeIndex]).addClass('active')
+    _afterAnimation:(item)->
+      @_setActiveItem(item)
 
       item.$el.removeClass('fake-active') for item in @items
-      @items[@activeIndex].$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
+
       @items[@_getPrevItemIndex()]?.$el
         .addClass('fake-active')
         .css('-webkit-transform', 'translate3d('+(-@viewWidth)+'px,0, 0)')
@@ -136,6 +138,14 @@ define (require, exports, module)->
         .addClass('fake-active')
         .css('-webkit-transform', 'translate3d('+@viewWidth+'px,0, 0)')
 
+    _setActiveItem:(item)->
+      super(item)
+      if not @disableIndicator
+        indicatorItems = @$el.find('.carousel-indicator-item')
+        indicatorItems.removeClass('active')
+        $(indicatorItems[@activeIndex]).addClass('active')
+
+      @items[@activeIndex].$el.css('-webkit-transform', 'translate3d(0, 0, 0)')
 
     _renderItem:(panel, i)->
       @$el.find('.carousel-indicator-container').append(@indicatorItem) if not @disableIndicator
