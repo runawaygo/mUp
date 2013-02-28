@@ -25,6 +25,7 @@ define (require, exports, module)->
       @
 
     changeItem:(index)=>
+      alert index
       return if index<0 or index>@items.length-1
       for item,i in @items
         if i is index then item.active() else item.deactive()
@@ -50,6 +51,7 @@ define (require, exports, module)->
       else
         @_renderTitle()
         @$el.append @contentContainer.render().$el
+
       @changeItem(0) if @activeIndex is -1
       @
 

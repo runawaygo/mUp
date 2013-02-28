@@ -11,10 +11,19 @@ define (require, exports, module)->
     initialize:(@options)->
       super(@options)
       @
-    initContentContainer:-> @contentContainer = new CarouselContainer {disableIndicator: @disableIndicator}
+    initContentContainer:-> 
+      @contentContainer = new CarouselContainer {disableIndicator: @disableIndicator}
+      @contentContainer.on('activeIndexChnaged', @_onContainerActiveIndexChanged)
+
+    _onContainerActiveIndexChanged:(index)=>
+      @changeItem(index)
+
+    #override '_changeContainerItem' method of TabContainer
     _changeContainerItem:(index)->
       animateStyle = if @activeIndex < index then animate.style.swipeLeft else animate.style.swipeRight
+      @contentContainer.off('activeIndexChnaged', @_onContainerActiveIndexChanged)
       @contentContainer.changeItem(index, {animate:animateStyle})
+      @contentContainer.on('activeIndexChnaged', @_onContainerActiveIndexChanged)
 
 
   exports = module.exports = CarouselTabContainer

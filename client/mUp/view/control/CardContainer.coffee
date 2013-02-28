@@ -20,6 +20,7 @@ define (require, exports, module)->
           @activeIndex = i
         else
           item.deactive()
+      @trigger('activeIndexChnaged', @activeIndex)
       @
     _changeItem:(toItem, options)->
       if options?.animate? and not @busy
